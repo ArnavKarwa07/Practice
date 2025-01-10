@@ -1,0 +1,314 @@
+-- -- Avg. Daily Footfall - Last Month
+-- --
+-- -- SELECT AVG(sum_value)
+-- -- FROM (
+-- --     SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE (from_time BETWEEN '2024-12-01 00:00:00' AND '2024-12-31 00:00:00')
+-- --     AND (EXTRACT(DOW FROM from_time) = 0)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date
+-- -- ) AS subquery;
+--
+-- -- select count(*) from o_iot_pcm_raw_data where from_time::date between '2024-12-01' AND '2024-12-31';
+-- -- select count(*) from o_iot_pcm_raw_data where from_time between '2024-12-01 00:00:00' AND '2024-12-31 00:00:00';
+-- --
+-- --
+-- -- SELECT AVG(sum_value)
+-- -- FROM (
+-- --     SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE (from_time::date >= date_trunc('month', current_date - interval '1' month)
+-- --   and from_time::date < date_trunc('month', current_date))
+-- --     AND (EXTRACT(DOW FROM from_time) = 0)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date
+-- -- ) AS subquery;
+--
+-- SELECT EXTRACT(DOW FROM from_time) AS day_of_week, round(AVG(sum_value))
+-- FROM (
+--     SELECT SUM(value) AS sum_value, from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date - interval '1' month)
+--   and from_time::date < date_trunc('month', current_date))
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery GROUP BY day_of_week;
+--
+-- -- Avg. Daily Footfall - This Month
+--
+-- SELECT AVG(sum_value)
+-- FROM (
+--     SELECT sum(value) AS sum_value
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--   and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (EXTRACT(DOW FROM from_time) = 0)
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery;
+--
+-- -- Total Weekdays Vs Weekend Footfall
+-- -- Weekends
+-- SELECT sum(sum_value)
+-- FROM (
+--     SELECT sum(value) AS sum_value
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--   and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (EXTRACT(DOW FROM from_time) in (0,6))
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery;
+--
+-- --Weekdays
+-- SELECT sum(sum_value)
+-- FROM (
+--     SELECT sum(value) AS sum_value
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--   and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (EXTRACT(DOW FROM from_time) not in (0,6))
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery;
+--
+-- SELECT (EXTRACT(DOW from from_time) in (0,6)) as weekends ,sum(sum_value)
+-- FROM (
+--     SELECT SUM(value) AS sum_value, from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--   and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery GROUP BY (EXTRACT(DOW from from_time) in (0,6));
+--
+-- -- Avg. Hourly Footfall 10Am to 2Pm (value)
+--
+-- SELECT EXTRACT(DOW FROM from_time) AS day_of_week, AVG(sum_value)/4 as avg_hourly
+-- FROM (
+--     SELECT SUM(value) AS sum_value, from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--            and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (from_time::time >= '10:00:00' and from_time::time < '14:00:00')
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery GROUP BY day_of_week;
+--
+-- -- Avg. Hourly Footfall 2Pm to 6Pm (value)
+--
+-- SELECT EXTRACT(DOW FROM from_time) AS day_of_week, AVG(sum_value)/4 as avg_hourly
+-- FROM (
+--     SELECT SUM(value) AS sum_value, from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--            and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (from_time::time >= '14:00:00' and from_time::time < '18:00:00')
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery GROUP BY day_of_week;
+--
+-- -- Avg. Hourly Footfall 6Pm to 12Am (value)
+-- SELECT EXTRACT(DOW FROM from_time) AS day_of_week, AVG(sum_value)/4 as avg_hourly
+-- FROM (
+--     SELECT SUM(value) AS sum_value, from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date)
+--            and from_time::date < date_trunc('month', current_date + interval '1' month))
+--     AND (from_time::time >= '18:00:00' and from_time::time <= '23:59:59')
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date
+-- ) AS subquery GROUP BY day_of_week;
+-- --
+-- -- -- Avg. Hourly Footfall 10Am to 2Pm (%)
+-- --
+-- -- CREATE FUNCTION avg_sum_value_interval (day_of_week int)
+-- -- RETURNS int
+-- -- LANGUAGE plpgsql
+-- -- AS
+-- -- $$
+-- -- DECLARE
+-- -- avg_sum_value_interval integer;
+-- -- BEGIN
+-- --     SELECT AVG(sum_value) into avg_sum_value_interval
+-- --     FROM (SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE(from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+-- --     AND (from_time::time >= '10:00:00' and from_time::time < '14:00:00')
+-- --     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date) as a;
+-- --     return avg_sum_value_interval;
+-- -- END;
+-- -- $$;
+-- --
+-- -- CREATE FUNCTION avg_sum_value(day_of_week int)
+-- -- RETURNS int
+-- -- LANGUAGE plpgsql
+-- -- AS
+-- -- $$
+-- -- DECLARE
+-- -- avg_sum_value integer;
+-- -- BEGIN
+-- --     SELECT AVG(sum_value) into avg_sum_value
+-- --     FROM (SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE (from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+-- --     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date) as a;
+-- --     return avg_sum_value;
+-- -- END;
+-- -- $$;
+-- --
+-- -- select avg_sum_value_interval(1);
+-- -- select avg_sum_value(1);
+-- --
+-- -- select (avg_sum_value_interval(1) * 1.0/avg_sum_value(1))*100 as avg_percentage;
+-- --
+-- -- drop function avg_sum_value(day_of_week int);
+-- -- drop function avg_sum_value_interval(day_of_week int);
+--
+-- -- drop function avg_sum_value_all();
+-- -- drop function avg_sum_value_interval_all();
+-- -- drop procedure avg_percentage;
+--
+-- -- CREATE FUNCTION avg_sum_value_all()
+-- -- RETURNS table(
+-- --     day_of_week int,
+-- --     avg_sum_value int
+-- --             ) AS
+-- -- $$
+-- -- DECLARE
+-- -- avg_sum_value integer;
+-- -- BEGIN
+-- --     FOR day_of_week in 0..6 loop
+-- --     SELECT AVG(sum_value) into avg_sum_value
+-- --     FROM (SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE (from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+-- --     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date) as a;
+-- --     return query
+-- --         select day_of_week, avg_sum_value;
+-- --     end loop;
+-- -- END;
+-- -- $$
+-- -- LANGUAGE 'plpgsql';
+-- --
+-- -- CREATE FUNCTION avg_sum_value_interval_all ()
+-- -- RETURNS table(
+-- --     day_of_week int,
+-- --     avg_sum_value_interval int
+-- --     ) AS
+-- -- $$
+-- -- DECLARE
+-- -- avg_sum_value_interval integer;
+-- -- BEGIN
+-- --     FOR day_of_week in 0..6 loop
+-- --     SELECT AVG(sum_value) into avg_sum_value_interval
+-- --     FROM (SELECT sum(value) AS sum_value
+-- --     FROM o_iot_pcm_raw_data
+-- --     WHERE(from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+-- --     AND (from_time::time >= '10:00:00' and from_time::time < '14:00:00')
+-- --     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+-- --     AND (o_iot_device_zone_code = 'PCMIN')
+-- --     AND (o_site_id = 2405)
+-- --     GROUP BY from_time::date) as a;
+-- --     return query
+-- --         select day_of_week, avg_sum_value_interval;
+-- --     end loop;
+-- -- END;
+-- -- $$
+-- -- LANGUAGE 'plpgsql';
+-- --
+-- -- CREATE PROCEDURE avg_percentage()
+-- -- LANGUAGE plpgsql
+-- -- AS $$
+-- -- DECLARE
+-- --     avg_interval_value int;
+-- --     avg_total_value int;
+-- --     n int;
+-- -- BEGIN
+-- --     for n in 0..6 loop
+-- --     avg_interval_value = (select avg_sum_value_interval from avg_sum_value_interval_all() where day_of_week = n);
+-- --     avg_total_value = (select avg_sum_value from avg_sum_value_all() where day_of_week = n);
+-- --     raise notice 'Value, %',round(((avg_interval_value*1.0/avg_total_value)*100));
+-- --     end loop;
+-- -- END;
+-- -- $$;
+-- -- call avg_percentage();
+--
+-- drop function interval_percentage();
+-- CREATE function interval_percentage()
+-- RETURNS table(
+--     day_of_week int,
+--     percentage float
+--     ) AS
+-- $$
+-- DECLARE
+-- avg_sum_value_interval integer;
+-- avg_sum_value integer;
+-- percentage float;
+-- BEGIN
+--     FOR day_of_week in 0..6 loop
+--     SELECT AVG(sum_value) into avg_sum_value_interval
+--     FROM (SELECT sum(value) AS sum_value
+--     FROM o_iot_pcm_raw_data
+--     WHERE(from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+--     AND (from_time::time >= '10:00:00' and from_time::time < '14:00:00')
+--     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date) as a;
+--     SELECT AVG(sum_value) into avg_sum_value
+--     FROM (SELECT sum(value) AS sum_value
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time::date >= date_trunc('month', current_date - interval '1' month) and from_time::date < date_trunc('month', current_date))
+--     AND (EXTRACT(DOW FROM from_time) = day_of_week)
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date) as a;
+--     percentage = round(((avg_sum_value_interval*1.0/avg_sum_value)*100));
+--     return query
+--         select day_of_week, percentage;
+--     end loop;
+-- END;
+-- $$
+-- LANGUAGE 'plpgsql'
+-- ;
+--
+-- select * from interval_percentage();
+-- -- Calender view
+-- -- Footfall of the day of this month
+-- SELECT sum(value) AS sum_value,from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time BETWEEN '2024-11-01 00:00:00' AND '2024-11-30 23:59:59')
+--     AND (EXTRACT(DOW FROM from_time) = 0)
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date;
+--
+-- -- Footfall of the day of previous month
+-- SELECT sum(value) AS sum_value,from_time::date
+--     FROM o_iot_pcm_raw_data
+--     WHERE (from_time BETWEEN '2024-12-01 00:00:00' AND '2024-12-31 23:59:59')
+--     AND (EXTRACT(DOW FROM from_time) = 0)
+--     AND (o_iot_device_zone_code = 'PCMIN')
+--     AND (o_site_id = 2405)
+--     GROUP BY from_time::date;
