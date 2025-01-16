@@ -1,0 +1,28 @@
+-- gpcmin
+-- gtpcimin
+-- site_id = 2405
+-- from_time = 16:00:00 to 16:30:00
+--
+-- select from_time,o_site_id,o_iot_device_zone_code, value
+-- from o_iot_pcm_raw_data
+-- where (o_iot_device_zone_code = 'GTPCMIN')
+--   and (o_site_id = 2405)
+--   and (from_time BETWEEN '2025-01-13 18:00:00' AND '2025-01-13 19:00:00')
+--
+-- select from_time,o_site_id,o_iot_device_zone_code, value
+-- from o_iot_pcm_raw_data
+-- where (o_iot_device_zone_code = 'GPCMIN')
+--   and (o_site_id = 2405)
+--   and (from_time BETWEEN '2025-01-13 18:00:00' AND '2025-01-13 19:00:00')
+
+select a.from_time, a.o_site_id, a.o_iot_device_zone_code, a.value, b.o_iot_device_zone_code, b.value
+from (select from_time, o_site_id, o_iot_device_zone_code, value
+    from o_iot_pcm_raw_data
+    where o_iot_device_zone_code = 'GPCMIN'
+        and o_site_id = 2405
+        and from_time between '2025-01-13 18:00:00' and '2025-01-13 19:00:00') as a
+join (select from_time, o_site_id, o_iot_device_zone_code, value
+    from o_iot_pcm_raw_data
+    where o_iot_device_zone_code = 'GTPCMIN'
+        and o_site_id = 2405
+        and from_time between '2025-01-13 18:00:00' and '2025-01-13 19:00:00') as b on a.from_time = b.from_time;
