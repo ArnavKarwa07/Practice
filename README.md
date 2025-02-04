@@ -1,2 +1,2 @@
 # iESG-intern
-Personal repo for tasks assigned at iESG 
+Personal repo for training tasks assigned at iESG 
